@@ -28,6 +28,7 @@ my $scale_name = shift || 'ionian';
 my $octave     = shift || 4;
 my $bpm        = shift || random_item([65 .. 75]);
 my $parts      = shift || random_parts(key => $key, scale => $scale_name, parts => 4); #'Amv-DMc-Emv-DMc'; # <Note><Major|minor><verse|chorus>-...
+my $sections   = shift || 3;
 
 my $chords_patch = shift || 4;
 my $bass_patch   = shift || 35;
@@ -50,33 +51,21 @@ my $d = MIDI::Drummer::Tiny->new(
 );
 
 my $counter = 0; # global progression increment
-$d->sync(
-    \&drums,
-    \&chords,
-    \&bass,
-);
-$counter = 0;
-$d->sync(
-    \&chords2,
-    \&bass2,
-);
-$counter = 0;
-$d->sync(
-    \&drums,
-    \&chords,
-    \&bass,
-);
-$counter = 0;
-$d->sync(
-    \&chords2,
-    \&bass2,
-);
-$counter = 0;
-$d->sync(
-    \&drums,
-    \&chords,
-    \&bass,
-);
+for my $section (1 .. $sections) {
+    if ($section > 1) {
+        $counter = 0;
+        $d->sync(
+            \&chords2,
+            \&bass2,
+        );
+    }
+    $counter = 0;
+    $d->sync(
+        \&drums,
+        \&chords,
+        \&bass,
+    );
+}
 
 $d->write;
 
