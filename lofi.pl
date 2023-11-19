@@ -28,14 +28,12 @@ my $scale_name = shift || 'ionian';
 my $octave     = shift || 4;
 my $bpm        = shift || random_item([65 .. 75]);
 my $parts      = shift || random_parts(key => $key, scale => $scale_name, parts => 4); #'Amv-DMc-Emv-DMc'; # <Note><Major|minor><verse|chorus>-...
-my $reps       = shift || 1; # The number of times to repeat an individual phrase
-my $multi      = shift || 1; # The number of times the phrases are repeated
 
 my $chords_patch = shift || 4;
 my $bass_patch   = shift || 35;
 
-printf "Complexity: %d, %d BPM, Parts: %s, Reps: %d, Multi: %d, Chords: %d, Bass: %d\n\n",
-    $complexity, $bpm, $parts, $reps, $multi, $chords_patch, $bass_patch;
+printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
+    $complexity, $bpm, $parts, $chords_patch, $bass_patch;
 
 my @parts = split /-/, $parts;
 
@@ -46,7 +44,7 @@ my $motifs = motifs(6, MIN_CHORD_SIZE);
 my $d = MIDI::Drummer::Tiny->new(
     file   => "$0.mid",
     bpm    => $bpm,
-    bars   => 4 * @parts * $reps,
+    bars   => 4 * @parts,
     reverb => 10,
     kick   => 36,
 );
@@ -161,7 +159,7 @@ sub drums {
     set_chan_patch($d->score, 9, 0);
 
     my $i = 0;
-    for my $n (1 .. $multi * $d->bars) {
+    for my $n (1 .. $d->bars) {
         for my $m (1 .. $d->beats) {
             $i++;
             $d->note($d->dotted_eighth, $d->closed_hh, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
@@ -235,7 +233,6 @@ sub chords {
         my @chords = split /-/, $named;
 
         # Add each chord to the score
-        for my $j (1 .. $reps) {
             for my $chord (@chords) {
                 $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
                 $chord =~ s/sus2/add9/;
@@ -244,12 +241,8 @@ sub chords {
                 @notes = midi_format(@notes);
                 push @accum, \@notes;
             }
-        }
     }
 
-#    my $k = 0;
-    my $multi_accum = $multi * @accum;
-    for my $j (1 .. $multi) {
         my $k = 0;
 #        print "\t", join ', ', map { "[@$_]" } @accum;
         for my $n (@accum) {
@@ -262,7 +255,6 @@ sub chords {
             }
         }
         print "\n";
-    }
 }
 
 sub bass {
@@ -287,7 +279,6 @@ sub bass {
 #        chord_notes => 0,
     );
 
-    for (1 .. $reps * $multi) {
         for my $p (@progressions) {
             my @chords = split /-/, $p;
 
@@ -312,7 +303,6 @@ sub bass {
                 $i++;
             }
         }
-    }
 }
 
 sub chords2 {
@@ -357,7 +347,6 @@ sub chords2 {
         my @chords = split /-/, $named;
 
         # Add each chord to the score
-        for my $j (1 .. $reps) {
             for my $chord (@chords) {
                 $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
                 $chord =~ s/sus2/add9/;
@@ -366,12 +355,9 @@ sub chords2 {
                 @notes = midi_format(@notes);
                 push @accum, \@notes;
             }
-        }
     }
 
     my $k = 0;
-    my $multi_accum = $multi * @accum;
-    for my $j (1 .. $multi) {
 #        print "\t", join ', ', map { "[@$_]" } @accum;
         for my $n (@accum[0 .. $#accum / 2]) {
             $k++;
@@ -383,7 +369,6 @@ sub chords2 {
             }
         }
         print "\n";
-    }
 }
 
 sub bass2 {
@@ -406,7 +391,6 @@ sub bass2 {
         wrap      => 'C3',
     );
 
-    for (1 .. $reps * $multi) {
         for my $p (@progressions[ 0 .. $#progressions / 2 ]) {
             my @chords = split /-/, $p;
 
@@ -431,5 +415,4 @@ sub bass2 {
                 $i++;
             }
         }
-    }
 }
