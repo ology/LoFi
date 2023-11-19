@@ -92,7 +92,7 @@ sub random_parts {
         my $index = $map{ $args{scale} }[ int rand $map{ $args{scale} }->@* ];
         my $pitch = $scale[$index];
         $parts_string .= $pitch;
-        $parts_string .= $chords[$index] =~ /m/ ? 'm' : 'M';
+        $parts_string .= 'M';#$chords[$index] =~ /m/ ? 'm' : 'M';
         $parts_string .= int rand 2 ? 'v' : 'c';
         push @parts, $parts_string;
     }
