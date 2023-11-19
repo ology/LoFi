@@ -243,18 +243,18 @@ sub chords {
             }
     }
 
-        my $k = 0;
-#        print "\t", join ', ', map { "[@$_]" } @accum;
-        for my $n (@accum) {
-            $k++;
-            if ($k % 2 == 0 || $k % 4 == 0) {
-                phrase($d, $n, $motifs);
-            }
-            else {
-                $d->note($d->whole, @$n);
-            }
+    my $k = 0;
+#    print "\t", join ', ', map { "[@$_]" } @accum;
+    for my $n (@accum) {
+        $k++;
+        if ($k % 2 == 0 || $k % 4 == 0) {
+            phrase($d, $n, $motifs);
         }
-        print "\n";
+        else {
+            $d->note($d->whole, @$n);
+        }
+    }
+    print "\n";
 }
 
 sub bass {
@@ -279,30 +279,30 @@ sub bass {
 #        chord_notes => 0,
     );
 
-        for my $p (@progressions) {
-            my @chords = split /-/, $p;
+    for my $p (@progressions) {
+        my @chords = split /-/, $p;
 
-            my $i = 0;
+        my $i = 0;
 
-            for my $n (0 .. $#chords) {
-                my $chord = $chords[$n];
+        for my $n (0 .. $#chords) {
+            my $chord = $chords[$n];
+            $chord =~ s/sus2/add9/;
+            $chord =~ s/6sus4/sus4/;
+            my $next = $chords[ $n + 1 ];
+            if ($next) {
                 $chord =~ s/sus2/add9/;
                 $chord =~ s/6sus4/sus4/;
-                my $next = $chords[ $n + 1 ];
-                if ($next) {
-                    $chord =~ s/sus2/add9/;
-                    $chord =~ s/6sus4/sus4/;
-                }
-
-                my $m = $motifs[ int rand @motifs ];
-
-                my $notes = $bassline->generate($chord, scalar(@$m), $next);
-
-                $mdp->add_to_score($d->score, $m, $notes);
-
-                $i++;
             }
+
+            my $m = $motifs[ int rand @motifs ];
+
+            my $notes = $bassline->generate($chord, scalar(@$m), $next);
+
+            $mdp->add_to_score($d->score, $m, $notes);
+
+            $i++;
         }
+    }
 }
 
 sub chords2 {
@@ -347,28 +347,28 @@ sub chords2 {
         my @chords = split /-/, $named;
 
         # Add each chord to the score
-            for my $chord (@chords) {
-                $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
-                $chord =~ s/sus2/add9/;
-                $chord =~ s/6sus4/sus4/;
-                my @notes = $cn->chord_with_octave($chord, $octave);
-                @notes = midi_format(@notes);
-                push @accum, \@notes;
-            }
+        for my $chord (@chords) {
+            $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
+            $chord =~ s/sus2/add9/;
+            $chord =~ s/6sus4/sus4/;
+            my @notes = $cn->chord_with_octave($chord, $octave);
+            @notes = midi_format(@notes);
+            push @accum, \@notes;
+        }
     }
 
     my $k = 0;
-#        print "\t", join ', ', map { "[@$_]" } @accum;
-        for my $n (@accum[0 .. $#accum / 2]) {
-            $k++;
-            if ($k % 4 == 0) {
-                phrase($d, $n, $motifs);
-            }
-            else {
-                $d->note($d->whole, @$n);
-            }
+#    print "\t", join ', ', map { "[@$_]" } @accum;
+    for my $n (@accum[0 .. $#accum / 2]) {
+        $k++;
+        if ($k % 4 == 0) {
+            phrase($d, $n, $motifs);
         }
-        print "\n";
+        else {
+            $d->note($d->whole, @$n);
+        }
+    }
+    print "\n";
 }
 
 sub bass2 {
@@ -391,28 +391,28 @@ sub bass2 {
         wrap      => 'C3',
     );
 
-        for my $p (@progressions[ 0 .. $#progressions / 2 ]) {
-            my @chords = split /-/, $p;
+    for my $p (@progressions[ 0 .. $#progressions / 2 ]) {
+        my @chords = split /-/, $p;
 
-            my $i = 0;
+        my $i = 0;
 
-            for my $n (0 .. $#chords) {
-                my $chord = $chords[$n];
+        for my $n (0 .. $#chords) {
+            my $chord = $chords[$n];
+            $chord =~ s/sus2/add9/;
+            $chord =~ s/6sus4/sus4/;
+            my $next = $chords[ $n + 1 ];
+            if ($next) {
                 $chord =~ s/sus2/add9/;
                 $chord =~ s/6sus4/sus4/;
-                my $next = $chords[ $n + 1 ];
-                if ($next) {
-                    $chord =~ s/sus2/add9/;
-                    $chord =~ s/6sus4/sus4/;
-                }
-
-                my $m = $i % 2 == 0 ? $motif2 : $motif1;
-
-                my $notes = $bassline->generate($chord, scalar(@$m), $next);
-
-                $mdp->add_to_score($d->score, $m, $notes);
-
-                $i++;
             }
+
+            my $m = $i % 2 == 0 ? $motif2 : $motif1;
+
+            my $notes = $bassline->generate($chord, scalar(@$m), $next);
+
+            $mdp->add_to_score($d->score, $m, $notes);
+
+            $i++;
         }
+    }
 }
