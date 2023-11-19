@@ -66,6 +66,17 @@ $d->sync(
     \&chords,
     \&bass,
 );
+$counter = 0;
+$d->sync(
+    \&chords2,
+    \&bass2,
+);
+$counter = 0;
+$d->sync(
+    \&drums,
+    \&chords,
+    \&bass,
+);
 
 $d->write;
 
