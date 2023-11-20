@@ -138,7 +138,7 @@ sub phrase {
             my @pitches = map { $conv->pitchnum($_) } @$n;
             my $voice = Music::VoiceGen->new(
                 pitches   => \@pitches,
-                intervals => [qw/-3 -2 -1 1 2 3/],
+                intervals => [qw/-4 -3 -2 -1 1 2 3 4/],
             );
             $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
         },
@@ -150,7 +150,7 @@ sub phrase {
                 intervals => [qw/-3 -2 -1 0 1 2 3/],
                 weightfn  => sub {
                     my ($from, $to, $interval) = @_;
-                    $interval == 0 ? 1 : 4;
+                    $interval == 0 ? 1 : 10;
                 },
             );
             $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
