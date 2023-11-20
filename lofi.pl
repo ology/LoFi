@@ -150,7 +150,7 @@ sub phrase {
                 intervals => [qw/-3 -2 -1 0 1 2 3/],
                 weightfn  => sub {
                     my ($from, $to, $interval) = @_;
-                    $interval == 0 ? 1 : 10;
+                    $from == 0 && $to == 0 ? 1 : 10;
                 },
             );
             $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
