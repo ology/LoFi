@@ -130,29 +130,38 @@ sub motifs {
 }
 
 sub phrase {
-        my ($d, $n, $motifs) = @_;
-        my $motif = $motifs->[ int rand @$motifs ];
-        my %dispatch = (
-            voicegen => sub {
-                my $conv = PitchConvert->new;
-                my @pitches = map { $conv->pitchnum($_) } @$n;
-                my $voice = Music::VoiceGen->new(
-                    pitches   => \@pitches,
-                    intervals => [qw/-3 -2 -1 0 1 2 3/],
-                    weightfn  => sub {
-                        my ($from, $to, $interval) = @_;
-                        $interval == 0 ? 1 : 4;
-                    },
-                );
-                $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
-            },
-            random => sub {
-                $d->note($motif->[$_], $n->[ int rand @$n ]) for 0 .. $#$motif;
-            },
-        );
-        my @keys = keys %dispatch;
-        my $routine = $dispatch{ $keys[ int rand @keys ] };
-        $routine->();
+    my ($d, $n, $motifs) = @_;
+    my $motif = $motifs->[ int rand @$motifs ];
+    my %dispatch = (
+        voicegen => sub {
+            my $conv = PitchConvert->new;
+            my @pitches = map { $conv->pitchnum($_) } @$n;
+            my $voice = Music::VoiceGen->new(
+                pitches   => \@pitches,
+                intervals => [qw/-3 -2 -1 1 2 3/],
+            );
+            $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
+        },
+        voicegen0 => sub {
+            my $conv = PitchConvert->new;
+            my @pitches = map { $conv->pitchnum($_) } @$n;
+            my $voice = Music::VoiceGen->new(
+                pitches   => \@pitches,
+                intervals => [qw/-3 -2 -1 0 1 2 3/],
+                weightfn  => sub {
+                    my ($from, $to, $interval) = @_;
+                    $interval == 0 ? 1 : 4;
+                },
+            );
+            $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
+        },
+        random => sub {
+            $d->note($motif->[$_], $n->[ int rand @$n ]) for 0 .. $#$motif;
+        },
+    );
+    my @keys = keys %dispatch;
+    my $routine = $dispatch{ $keys[ int rand @keys ] };
+    $routine->();
 }
 
 sub drums {
