@@ -278,9 +278,9 @@ sub bass {
     unshift @motifs, [ 'wn' ];
 
     my $bassline = Music::Bassline::Generator->new(
+        verbose   => 0,
         octave    => 2,
         guitar    => 1,
-        verbose   => 0,
 #        scale     => sub { $_[0] =~ /^[A-G][#b]?m/ ? 'pminor' : 'pentatonic' },
         tonic     => 1,
         positions => { major => [0,3,4], minor => [0,3,4] },
@@ -392,9 +392,9 @@ sub bass2 {
     my $motif2 = $mdp->motif;
 
     my $bassline = Music::Bassline::Generator->new(
+        verbose   => 0,
         octave    => 2,
         guitar    => 1,
-        verbose   => 0,
         tonic     => 1,
         positions => { major => [0,2,3,4,5], minor => [0,2,3,4,5,6] },
         wrap      => 'C3',
