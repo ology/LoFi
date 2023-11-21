@@ -31,9 +31,9 @@ my %opts = (
     chords_patch => 4,
     bass_patch   => 35,
     bpm          => random_item([65 .. 75]),
-    partstring   => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
+    parts   => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
     sections     => 3,
-    parts        => 4, # section parts
+    zones        => 4, # section parts
     motifs       => 6, # half the number of possible motifs
 );
 GetOptions( \%opts,
@@ -44,22 +44,22 @@ GetOptions( \%opts,
     'chords_patch=i',
     'bass_patch=i',
     'bpm=i',
-    'partstring=s',
+    'parts=s',
     'sections=i',
-    'parts=i',
+    'zones=i',
     'motifs=i',
 ) or die "Can't GetOptions";
 
-$opts{partstring} ||= random_parts(
+$opts{parts} ||= random_parts(
     key   => $opts{key},
     scale => $opts{scale_name},
-    parts => $opts{parts},
+    parts => $opts{zones},
 );
 
 printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
-    $opts{complexity}, $opts{bpm}, $opts{partstring}, $opts{chords_patch}, $opts{bass_patch};
+    $opts{complexity}, $opts{bpm}, $opts{parts}, $opts{chords_patch}, $opts{bass_patch};
 
-my @parts = split /-/, $opts{partstring};
+my @parts = split /-/, $opts{parts};
 
 my @progressions; # nb: populated by chords() used by bass()
 
