@@ -6,6 +6,7 @@ package main;
 use strict;
 use warnings;
 
+use Getopt::Long qw(GetOptions);
 use Data::Dumper::Compact qw(ddc);
 use List::Util qw(none);
 use Music::Chord::Note ();
@@ -22,21 +23,43 @@ use Music::ToRoman ();
 
 use constant MIN_CHORD_SIZE => 3;
 
-my $complexity = shift || random_item([2 .. 4]); # 1: least to 4: most
-my $key        = shift || 'C';
-my $scale_name = shift || 'ionian';
-my $octave     = shift || 4;
-my $bpm        = shift || random_item([65 .. 75]);
-my $parts      = shift || random_parts(key => $key, scale => $scale_name, parts => 4); #'Amv-DMc-Emv-DMc'; # <Note><Major|minor><verse|chorus>-...
-my $sections   = shift || 3;
-
-my $chords_patch = shift || 4;
-my $bass_patch   = shift || 35;
+my %opts = (
+    complexity   => random_item([2 .. 4]), # 1: least to 4: most
+    key          => 'C',
+    scale_name   => 'ionian',
+    octave       => 4,
+    chords_patch => 4,
+    bass_patch   => 35,
+    bpm          => random_item([65 .. 75]),
+    partstring   => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
+    sections     => 3,
+    parts        => 4, # section parts
+    motifs       => 6, # half the number of possible motifs
+);
+GetOptions( \%opts,
+    'complexity=i',
+    'key=s',
+    'scale_name=s',
+    'octave=i',
+    'chords_patch=i',
+    'bass_patch=i',
+    'bpm=i',
+    'parts=s',
+    'sections=i',
+    'parts=i',
+    'motifs=i',
+) or die "Can't GetOptions";
 
 printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
-    $complexity, $bpm, $parts, $chords_patch, $bass_patch;
+    $opts{complexity}, $opts{bpm}, $opts{partstring}, $opts{chords_patch}, $opts{bass_patch};
 
-my @parts = split /-/, $parts;
+$opts{partstring} ||= random_parts(
+    key   => $opts{key},
+    scale => $opts{scale_name},
+    parts => $opts{parts},
+);
+
+my @parts = split /-/, $opts{parts};
 
 my @progressions; # nb: populated by chords() used by bass()
 
@@ -44,14 +67,14 @@ my $motifs = motifs(6, MIN_CHORD_SIZE);
 
 my $d = MIDI::Drummer::Tiny->new(
     file   => "$0.mid",
-    bpm    => $bpm,
+    bpm    => $opts{bpm},
     bars   => 4 * @parts,
     reverb => 10,
     kick   => 36,
 );
 
 my $counter = 0; # global progression increment
-for my $section (1 .. $sections) {
+for my $section (1 .. $opts{sections}) {
     if ($section > 1) {
         $counter = 0;
         $d->sync(
@@ -184,7 +207,7 @@ sub drums {
 }
 
 sub chords {
-    set_chan_patch($d->score, 0, $chords_patch);
+    set_chan_patch($d->score, 0, $opts{chords_patch});
 
     my $cn = Music::Chord::Note->new;
 
@@ -218,22 +241,22 @@ sub chords {
         # Keep track of the progressions used
         push @progressions, $named;
 
-        if ($complexity == 1) {
+        if ($opts{complexity} == 1) {
             $named = $progressions[0];
         }
-        elsif ($complexity == 2 && ($counter == 1 || $counter == 3)) {
+        elsif ($opts{complexity} == 2 && ($counter == 1 || $counter == 3)) {
             $named = $progressions[0];
         }
-        elsif ($complexity == 2 && $counter == 4) {
+        elsif ($opts{complexity} == 2 && $counter == 4) {
             $named = $progressions[1];
         }
-        elsif ($complexity == 3 && $counter == 3) {
+        elsif ($opts{complexity} == 3 && $counter == 3) {
             $named = $progressions[2];
         }
-        elsif ($complexity == 3 && $counter == 4) {
+        elsif ($opts{complexity} == 3 && $counter == 4) {
             $named = $progressions[1];
         }
-        if ($complexity < 4) {
+        if ($opts{complexity} < 4) {
             $progressions[ $counter - 1 ] = $named;
         }
 
@@ -246,7 +269,7 @@ sub chords {
                 $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
                 $chord =~ s/sus2/add9/;
                 $chord =~ s/6sus4/sus4/;
-                my @notes = $cn->chord_with_octave($chord, $octave);
+                my @notes = $cn->chord_with_octave($chord, $opts{octave});
                 @notes = midi_format(@notes);
                 push @accum, \@notes;
             }
@@ -267,14 +290,14 @@ sub chords {
 }
 
 sub bass {
-    set_chan_patch($d->score, 1, $bass_patch);
+    set_chan_patch($d->score, 1, $opts{bass_patch});
 
     my $mdp = Music::Duration::Partition->new(
         size    => 4,
         pool    => [qw/ dhn hn qn /],
         weights => [    4,  4, 1   ],
     );
-    my @motifs = map { $mdp->motif } 1 .. $complexity;
+    my @motifs = map { $mdp->motif } 1 .. $opts{complexity};
     unshift @motifs, [ 'wn' ];
 
     my $bassline = Music::Bassline::Generator->new(
@@ -315,7 +338,7 @@ sub bass {
 }
 
 sub chords2 {
-    set_chan_patch($d->score, 0, $chords_patch);
+    set_chan_patch($d->score, 0, $opts{chords_patch});
 
     my $cn = Music::Chord::Note->new;
 
@@ -360,7 +383,7 @@ sub chords2 {
             $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
             $chord =~ s/sus2/add9/;
             $chord =~ s/6sus4/sus4/;
-            my @notes = $cn->chord_with_octave($chord, $octave);
+            my @notes = $cn->chord_with_octave($chord, $opts{octave});
             @notes = midi_format(@notes);
             push @accum, \@notes;
         }
@@ -381,7 +404,7 @@ sub chords2 {
 }
 
 sub bass2 {
-    set_chan_patch($d->score, 1, $bass_patch);
+    set_chan_patch($d->score, 1, $opts{bass_patch});
 
     my $mdp = Music::Duration::Partition->new(
         size    => 4,
