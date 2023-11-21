@@ -165,19 +165,19 @@ sub phrase {
             );
             $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
         },
-        voicegen0 => sub {
-            my $conv = PitchConvert->new;
-            my @pitches = map { $conv->pitchnum($_) } @$n;
-            my $voice = Music::VoiceGen->new(
-                pitches   => \@pitches,
-                intervals => [qw/-3 -2 -1 0 1 2 3/],
-                weightfn  => sub {
-                    my ($from, $to, $interval) = @_;
-                    $from == 0 && $to == 0 ? 1 : 10;
-                },
-            );
-            $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
-        },
+#        voicegen0 => sub {
+#            my $conv = PitchConvert->new;
+#            my @pitches = map { $conv->pitchnum($_) } @$n;
+#            my $voice = Music::VoiceGen->new(
+#                pitches   => \@pitches,
+#                intervals => [qw/-3 -2 -1 0 1 2 3/],
+#                weightfn  => sub {
+#                    my ($from, $to, $interval) = @_;
+#                    $from == 0 && $to == 0 ? 1 : 10;
+#                },
+#            );
+#            $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
+#        },
         random => sub {
             $d->note($motif->[$_], $n->[ int rand @$n ]) for 0 .. $#$motif;
         },
@@ -294,8 +294,8 @@ sub bass {
 
     my $mdp = Music::Duration::Partition->new(
         size    => 4,
-        pool    => [qw/ dhn hn qn /],
-        weights => [    4,  4, 1   ],
+        pool    => [qw/ wn dhn hn qn /],
+        weights => [    2, 4,  4, 1   ],
     );
     my @motifs = map { $mdp->motif } 1 .. $opts{complexity};
     unshift @motifs, [ 'wn' ];
