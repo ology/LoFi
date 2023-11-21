@@ -266,7 +266,7 @@ sub chords {
 
         # Add each chord to the score
             for my $chord (@chords) {
-                $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
+                $chord =~ s/^(.+)\/.+$/$1/ if $chord =~ /\//;
                 $chord =~ s/sus2/add9/;
                 $chord =~ s/6sus4/sus4/;
                 my @notes = $cn->chord_with_octave($chord, $opts{octave});
@@ -380,7 +380,7 @@ sub chords2 {
 
         # Add each chord to the score
         for my $chord (@chords) {
-            $chord =~ s/^(.+)\//$1/ if $chord =~ /\//;
+            $chord =~ s/^(.+)\/.+$/$1/ if $chord =~ /\//;
             $chord =~ s/sus2/add9/;
             $chord =~ s/6sus4/sus4/;
             my @notes = $cn->chord_with_octave($chord, $opts{octave});
