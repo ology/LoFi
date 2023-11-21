@@ -50,14 +50,14 @@ GetOptions( \%opts,
     'motifs=i',
 ) or die "Can't GetOptions";
 
-printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
-    $opts{complexity}, $opts{bpm}, $opts{partstring}, $opts{chords_patch}, $opts{bass_patch};
-
 $opts{partstring} ||= random_parts(
     key   => $opts{key},
     scale => $opts{scale_name},
     parts => $opts{parts},
 );
+
+printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
+    $opts{complexity}, $opts{bpm}, $opts{partstring}, $opts{chords_patch}, $opts{bass_patch};
 
 my @parts = split /-/, $opts{parts};
 
