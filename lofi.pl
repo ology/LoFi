@@ -59,7 +59,7 @@ $opts{partstring} ||= random_parts(
 printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
     $opts{complexity}, $opts{bpm}, $opts{partstring}, $opts{chords_patch}, $opts{bass_patch};
 
-my @parts = split /-/, $opts{parts};
+my @parts = split /-/, $opts{partstring};
 
 my @progressions; # nb: populated by chords() used by bass()
 
