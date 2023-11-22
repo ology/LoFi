@@ -165,19 +165,6 @@ sub phrase {
             );
             $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
         },
-#        voicegen0 => sub {
-#            my $conv = PitchConvert->new;
-#            my @pitches = map { $conv->pitchnum($_) } @$n;
-#            my $voice = Music::VoiceGen->new(
-#                pitches   => \@pitches,
-#                intervals => [qw/-3 -2 -1 0 1 2 3/],
-#                weightfn  => sub {
-#                    my ($from, $to, $interval) = @_;
-#                    $from == 0 && $to == 0 ? 1 : 10;
-#                },
-#            );
-#            $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
-#        },
         random => sub {
             $d->note($motif->[$_], $n->[ int rand @$n ]) for 0 .. $#$motif;
         },
@@ -264,15 +251,7 @@ sub chords {
 
         my @chords = split /-/, $named;
 
-        # Add each chord to the score
-            for my $chord (@chords) {
-                $chord =~ s/^(.+)\/.+$/$1/ if $chord =~ /\//;
-                $chord =~ s/sus2/add9/;
-                $chord =~ s/6sus4/sus4/;
-                my @notes = $cn->chord_with_octave($chord, $opts{octave});
-                @notes = midi_format(@notes);
-                push @accum, \@notes;
-            }
+        add_chord($cn, \@chords, \@accum);
     }
 
     my $k = 0;
@@ -378,15 +357,7 @@ sub chords2 {
 
         my @chords = split /-/, $named;
 
-        # Add each chord to the score
-        for my $chord (@chords) {
-            $chord =~ s/^(.+)\/.+$/$1/ if $chord =~ /\//;
-            $chord =~ s/sus2/add9/;
-            $chord =~ s/6sus4/sus4/;
-            my @notes = $cn->chord_with_octave($chord, $opts{octave});
-            @notes = midi_format(@notes);
-            push @accum, \@notes;
-        }
+        add_chord($cn, \@chords, \@accum);
     }
 
     my $k = 0;
@@ -401,6 +372,19 @@ sub chords2 {
         }
     }
     print "\n";
+}
+
+# Add each chord to the score
+sub add_chord {
+    my ($cn, $chords, $accum) = @_;
+    for my $chord (@$chords) {
+        $chord =~ s/^(.+)\/.+$/$1/ if $chord =~ /\//;
+        $chord =~ s/sus2/add9/;
+        $chord =~ s/6sus4/sus4/;
+        my @notes = $cn->chord_with_octave($chord, $opts{octave});
+        @notes = midi_format(@notes);
+        push @$accum, \@notes;
+    }
 }
 
 sub bass2 {
