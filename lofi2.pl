@@ -448,14 +448,14 @@ sub melody {
         }
         else {
             my ($dura, $notes);
-            if (int rand 2) {
+#            if (int rand 2) {
                 $dura = $d->whole;
                 $notes = 1;
-            }
-            else {
-                $dura = $d->half;
-                $notes = 2;
-            }
+#            }
+#            else {
+#                $dura = $d->half;
+#                $notes = 2;
+#            }
             $d->note($dura, $n->[ int rand @$n ]) for 1 .. $notes;
         }
     }
