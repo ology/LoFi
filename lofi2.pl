@@ -28,6 +28,7 @@ my %opts = (
     octave       => 4,
     chords_patch => 4,
     bass_patch   => 35,
+    melody_patch => 89,
     bpm          => random_item([65 .. 75]),
     parts        => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
     sections     => 3,
@@ -40,6 +41,7 @@ GetOptions( \%opts,
     'octave=i',
     'chords_patch=i',
     'bass_patch=i',
+    'melody_patch=i',
     'bpm=i',
     'parts=s',
     'sections=i',
@@ -410,7 +412,7 @@ sub bass2 {
 }
 
 sub melody {
-    set_chan_patch($d->score, 2, $opts{chords_patch});
+    set_chan_patch($d->score, 2, $opts{melody_patch});
 
     my $melody_motifs = motifs(
         6,
