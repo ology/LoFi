@@ -67,8 +67,8 @@ my $motifs = motifs(4, MIN_CHORD_SIZE);
 my $melody_motifs = motifs(
     4,
     MIN_CHORD_SIZE,
-    [qw/ dhn hn qn en /],
-    [    2,  3, 2, 2   ],
+    [qw/ hn qn en /],
+    [    3, 2, 2   ],
 );
 
 my $d = MIDI::Drummer::Tiny->new(
