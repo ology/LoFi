@@ -55,11 +55,10 @@ $opts{parts} ||= random_parts(
     scale => $opts{scale_name},
     parts => $opts{zones},
 );
+my @parts = split /-/, $opts{parts};
 
 printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
     $opts{complexity}, $opts{bpm}, $opts{parts}, $opts{chords_patch}, $opts{bass_patch};
-
-my @parts = split /-/, $opts{parts};
 
 my @progressions; # nb: populated by chords() used by bass()
 
