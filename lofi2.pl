@@ -34,7 +34,7 @@ my %opts = (
     parts        => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
     sections     => 3,
     zones        => 4, # section parts
-    motifs       => 6, # half the number of possible motifs
+    motifs       => 4, # half the number of possible motifs
 );
 GetOptions( \%opts,
     'complexity=i',
@@ -62,14 +62,6 @@ printf "Complexity: %d, %d BPM, Parts: %s, Chords: %d, Bass: %d\n\n",
 my @parts = split /-/, $opts{parts};
 
 my @progressions; # nb: populated by chords() used by bass()
-
-my $motifs = motifs(4, MIN_CHORD_SIZE);
-my $melody_motifs = motifs(
-    4,
-    MIN_CHORD_SIZE,
-    [qw/ hn qn en /],
-    [    3, 2, 2   ],
-);
 
 my $d = MIDI::Drummer::Tiny->new(
     file   => "$0.mid",
@@ -163,8 +155,9 @@ sub motifs {
 }
 
 sub phrase {
-    my ($d, $n, $motifs) = @_;
-    my $motif = $motifs->[ int rand @$motifs ];
+    my ($d, $n, $my_motifs) = @_;
+    $my_motifs ||= motifs($opts{motifs}, MIN_CHORD_SIZE);
+    my $motif = $my_motifs->[ int rand @$my_motifs ];
     my %dispatch = (
         voicegen => sub {
             my $conv = PitchConvert->new;
@@ -431,6 +424,13 @@ sub bass2 {
 
 sub melody {
     set_chan_patch($d->score, 2, $opts{chords_patch});
+
+    my $melody_motifs = motifs(
+        $opts{motifs},
+        MIN_CHORD_SIZE,
+        [qw/ hn qn en /],
+        [    3, 2, 2   ],
+    );
 
     my $cn = Music::Chord::Note->new;
 
