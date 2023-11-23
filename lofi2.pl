@@ -415,7 +415,7 @@ sub melody {
     set_chan_patch($d->score, 2, $opts{melody_patch});
 
     my $melody_motifs = motifs(
-        6,
+        4,
         4,
         [qw/ hn qn en /],
         [    3, 2, 2   ],
