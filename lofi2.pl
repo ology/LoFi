@@ -419,8 +419,8 @@ sub melody {
         [    3, 2, 2   ],
     );
     my $triplet_motifs = motifs(
-        4,
-        4,
+        4,                 # number of motifs
+        4,                 # number of quarter-notes
         [qw/ hn qn tqn /], # pool
         [    1, 2, 2    ], # weights
         [    1, 1, 3    ], # groups
