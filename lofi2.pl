@@ -249,7 +249,7 @@ sub chords {
             $progressions[ $counter - 1 ] = $named;
         }
 
-        print "$named\n";
+        print "Chords: $named\n";
 
         my @chords = split /-/, $named;
 
@@ -348,7 +348,7 @@ sub chords2 {
         # Keep track of the progressions used
         push @progressions, $named;
 
-        print "$named\n" if $i <= 2;
+        print "Chords2: $named\n" if $i <= 2;
 
         my @chords = split /-/, $named;
 
@@ -422,7 +422,7 @@ sub bass2 {
 }
 
 sub melody {
-    set_chan_patch($d->score, 0, $opts{chords_patch});
+    set_chan_patch($d->score, 2, $opts{chords_patch});
 
     my $cn = Music::Chord::Note->new;
 
@@ -430,55 +430,9 @@ sub melody {
 
     my @accum; # Note accumulator
 
-    @progressions = (); # reset the progression list
-
-    for my $part (@parts) {
-        $counter++;
-        my ($note, $section, $scale, $pool);
-        # Set the pool of possible progressions given scale and section
-        if ($part =~ /^([A-G][#b]?)(M|m)(v|c)$/) {
-            ($note, $scale, $section) = ($1, $2, $3);
-            $scale   = $scale eq 'M' ? 'major' : 'minor';
-            $section = $section eq 'v' ? 'verse' : 'chorus';
-            $pool    = $data{rock}{$scale}{$section};
-        }
-
-        # Set the transposition map
-        my %note_map;
-        @note_map{ get_scale_notes('C', $scale) } = get_scale_notes($note, $scale);
-
-        # Get a random progression
-        my $progression = $pool->[int rand @$pool];
-
-        # Transpose the progression chords from C
-        (my $named = $progression->[0]) =~ s/([A-G][#b]?)/$note_map{$1}/g;
-
-        # Keep track of the progressions used
-        push @progressions, $named;
-
-        if ($opts{complexity} == 1) {
-            $named = $progressions[0];
-        }
-        elsif ($opts{complexity} == 2 && ($counter == 1 || $counter == 3)) {
-            $named = $progressions[0];
-        }
-        elsif ($opts{complexity} == 2 && $counter == 4) {
-            $named = $progressions[1];
-        }
-        elsif ($opts{complexity} == 3 && $counter == 3) {
-            $named = $progressions[2];
-        }
-        elsif ($opts{complexity} == 3 && $counter == 4) {
-            $named = $progressions[1];
-        }
-        if ($opts{complexity} < 4) {
-            $progressions[ $counter - 1 ] = $named;
-        }
-
-        print "$named\n";
-
-        my @chords = split /-/, $named;
-
+    for my $progression (@progressions) {
+#        print "Melody: $progression\n";
+        my @chords = split /-/, $progression;
         add_chord($cn, \@chords, \@accum);
     }
 
@@ -490,7 +444,7 @@ sub melody {
             phrase($d, $n, $motifs);
         }
         else {
-            $d->note($d->whole, @$n);
+            $d->note($d->whole, $n->[ int rand @$n ]);
         }
     }
     print "\n";
