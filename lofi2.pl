@@ -444,10 +444,19 @@ sub melody {
             phrase($d, $n, $motifs);
         }
         else {
-            $d->note($d->whole, $n->[ int rand @$n ]);
+            my ($dura, $notes);
+            if (int rand 2) {
+                $dura = $d->whole;
+                $notes = 1;
+            }
+            else {
+                $dura = $d->half;
+                $notes = 2;
+            }
+            $d->note($dura, $n->[ int rand @$n ]) for 1 .. $notes;
         }
     }
-    print "\n";
+#    print "\n";
 }
 
 sub melody2 {
