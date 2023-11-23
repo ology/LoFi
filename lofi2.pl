@@ -8,7 +8,7 @@ use warnings;
 
 use Getopt::Long qw(GetOptions);
 use Data::Dumper::Compact qw(ddc);
-use List::Util qw(none);
+use List::Util qw(any none);
 use Music::Chord::Note ();
 use Music::Scales qw(get_scale_notes);
 use Music::VoiceGen ();
@@ -21,8 +21,6 @@ use MIDI::Util qw(set_chan_patch midi_format);
 use Music::Duration::Partition ();
 use Music::ToRoman ();
 
-use constant MIN_CHORD_SIZE => 3;
-
 my %opts = (
     complexity   => random_item([2 .. 4]), # 1: least to 4: most
     key          => 'C',
@@ -34,7 +32,6 @@ my %opts = (
     parts        => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
     sections     => 3,
     zones        => 4, # section parts
-    motifs       => 4, # half the number of possible motifs
 );
 GetOptions( \%opts,
     'complexity=i',
@@ -47,7 +44,6 @@ GetOptions( \%opts,
     'parts=s',
     'sections=i',
     'zones=i',
-    'motifs=i',
 ) or die "Can't GetOptions";
 
 $opts{parts} ||= random_parts(
@@ -122,31 +118,22 @@ sub random_parts {
 }
 
 sub motifs {
-    my ($mnum, $nnum, $pool, $weights) = @_;
-    $pool    ||= [qw/ dhn hn qn en /];
-    $weights ||= [    2,  3, 1, 1   ];
+    my ($num, $size, $pool, $weights, $groups) = @_;
+    die 'No pool given' unless $pool;
+    $weights ||= [ (1) x @$pool ];
+    $groups  ||= [ (1) x @$pool ];
     my $mdp = Music::Duration::Partition->new(
-        size    => 4,
+        size    => $size,
         pool    => $pool,
         weights => $weights,
+        groups  => $groups,
     );
     my %seen;
     my @motifs;
-    for my $i (1 .. $mnum) {
+    my $triplets = any { $_ =~ /t/ } @$pool ? 1 : 0;
+    for my $i (1 .. $num) {
         my $motif = $mdp->motif;
-        redo if @$motif <= 1 || @$motif > $nnum;
-        redo if $seen{ join '-', @$motif }++;
-        push @motifs, $motif;
-    }
-    $mdp = Music::Duration::Partition->new(
-        size    => 4,
-        pool    => [qw/ hn qn tqn /],
-        weights => [    1, 2, 2    ],
-        groups  => [    1, 1, 3    ],
-    );
-    for my $i (1 .. $mnum) {
-        my $motif = $mdp->motif;
-        redo if none { $_ =~ /t/ } @$motif;
+        redo if $triplets && none { $_ =~ /t/ } @$motif;
         redo if $seen{ join '-', @$motif }++;
         push @motifs, $motif;
     }
@@ -154,9 +141,8 @@ sub motifs {
 }
 
 sub phrase {
-    my ($d, $n, $my_motifs) = @_;
-    $my_motifs ||= motifs($opts{motifs}, MIN_CHORD_SIZE);
-    my $motif = $my_motifs->[ int rand @$my_motifs ];
+    my ($d, $n, $motifs) = @_;
+    my $motif = $motifs->[ int rand @$motifs ];
     my %dispatch = (
         voicegen => sub {
             my $conv = PitchConvert->new;
@@ -266,13 +252,12 @@ sub chords {
 sub bass {
     set_chan_patch($d->score, 1, $opts{bass_patch});
 
-    my $mdp = Music::Duration::Partition->new(
-        size    => 4,
-        pool    => [qw/ wn dhn hn qn /],
-        weights => [    2, 4,  4, 1   ],
+    my $motifs = motifs(
+        $opts{complexity},
+        4,
+        [qw/ wn dhn hn qn /],
+        [    2, 4,  4, 1   ],
     );
-    my @motifs = map { $mdp->motif } 1 .. $opts{complexity};
-    unshift @motifs, [ 'wn' ];
 
     my $bassline = Music::Bassline::Generator->new(
         verbose   => 0,
@@ -300,11 +285,13 @@ sub bass {
                 $chord =~ s/6sus4/sus4/;
             }
 
-            my $m = $motifs[ int rand @motifs ];
+            my $m = $motifs->[ int rand @$motifs ];
 
             my $notes = $bassline->generate($chord, scalar(@$m), $next);
 
-            $mdp->add_to_score($d->score, $m, $notes);
+            for my $i (0 .. $#$m) {
+                $d->note($m->[$i], $notes->[$i]);
+            }
 
             $i++;
         }
@@ -378,13 +365,12 @@ sub add_chord {
 sub bass2 {
     set_chan_patch($d->score, 1, $opts{bass_patch});
 
-    my $mdp = Music::Duration::Partition->new(
-        size    => 4,
-        pool    => [qw/ dhn hn qn en /],
-        weights => [    3,  3, 2, 1   ],
+    my $motifs = motifs(
+        2,
+        4,
+        [qw/ dhn hn qn en /],
+        [    3,  3, 2, 1   ],
     );
-    my $motif1 = $mdp->motif;
-    my $motif2 = $mdp->motif;
 
     my $bassline = Music::Bassline::Generator->new(
         verbose   => 0,
@@ -410,11 +396,13 @@ sub bass2 {
                 $chord =~ s/6sus4/sus4/;
             }
 
-            my $m = $i % 2 == 0 ? $motif2 : $motif1;
+            my $m = $i % 2 == 0 ? $motifs->[1] : $motifs->[0];
 
             my $notes = $bassline->generate($chord, scalar(@$m), $next);
 
-            $mdp->add_to_score($d->score, $m, $notes);
+            for my $i (0 .. $#$m) {
+                $d->note($m->[$i], $notes->[$i]);
+            }
 
             $i++;
         }
@@ -425,11 +413,19 @@ sub melody {
     set_chan_patch($d->score, 2, $opts{chords_patch});
 
     my $melody_motifs = motifs(
-        $opts{motifs},
-        MIN_CHORD_SIZE,
+        6,
+        4,
         [qw/ hn qn en /],
         [    3, 2, 2   ],
     );
+    my $triplet_motifs = motifs(
+        4,
+        4,
+        [qw/ hn qn tqn /], # pool
+        [    1, 2, 2    ], # weights
+        [    1, 1, 3    ], # groups
+    );
+    my @motifs = (@$melody_motifs, @$triplet_motifs);
 
     my $cn = Music::Chord::Note->new;
 
@@ -448,7 +444,7 @@ sub melody {
     for my $n (@accum) {
         $k++;
         if ($k % 2 == 0 || $k % 4 == 0) {
-            phrase($d, $n, $melody_motifs);
+            phrase($d, $n, \@motifs);
         }
         else {
             my ($dura, $notes);
