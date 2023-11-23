@@ -80,6 +80,7 @@ for my $section (1 .. $opts{sections}) {
         $d->sync(
             \&chords2,
             \&bass2,
+            \&melody2,
         );
     }
     $counter = 0;
@@ -87,6 +88,7 @@ for my $section (1 .. $opts{sections}) {
         \&drums,
         \&chords,
         \&bass,
+        \&melody,
     );
 }
 
@@ -254,16 +256,9 @@ sub chords {
         add_chord($cn, \@chords, \@accum);
     }
 
-    my $k = 0;
 #    print "\t", join ', ', map { "[@$_]" } @accum;
     for my $n (@accum) {
-        $k++;
-        if ($k % 2 == 0 || $k % 4 == 0) {
-            phrase($d, $n, $motifs);
-        }
-        else {
-            $d->note($d->whole, @$n);
-        }
+        $d->note($d->whole, @$n);
     }
     print "\n";
 }
@@ -360,16 +355,9 @@ sub chords2 {
         add_chord($cn, \@chords, \@accum);
     }
 
-    my $k = 0;
 #    print "\t", join ', ', map { "[@$_]" } @accum;
     for my $n (@accum[0 .. $#accum / 2]) {
-        $k++;
-        if ($k % 4 == 0) {
-            phrase($d, $n, $motifs);
-        }
-        else {
-            $d->note($d->whole, @$n);
-        }
+        $d->note($d->whole, @$n);
     }
     print "\n";
 }
@@ -431,4 +419,82 @@ sub bass2 {
             $i++;
         }
     }
+}
+
+sub melody {
+    set_chan_patch($d->score, 0, $opts{chords_patch});
+
+    my $cn = Music::Chord::Note->new;
+
+    my %data = Data::Dataset::ChordProgressions::as_hash();
+
+    my @accum; # Note accumulator
+
+    @progressions = (); # reset the progression list
+
+    for my $part (@parts) {
+        $counter++;
+        my ($note, $section, $scale, $pool);
+        # Set the pool of possible progressions given scale and section
+        if ($part =~ /^([A-G][#b]?)(M|m)(v|c)$/) {
+            ($note, $scale, $section) = ($1, $2, $3);
+            $scale   = $scale eq 'M' ? 'major' : 'minor';
+            $section = $section eq 'v' ? 'verse' : 'chorus';
+            $pool    = $data{rock}{$scale}{$section};
+        }
+
+        # Set the transposition map
+        my %note_map;
+        @note_map{ get_scale_notes('C', $scale) } = get_scale_notes($note, $scale);
+
+        # Get a random progression
+        my $progression = $pool->[int rand @$pool];
+
+        # Transpose the progression chords from C
+        (my $named = $progression->[0]) =~ s/([A-G][#b]?)/$note_map{$1}/g;
+
+        # Keep track of the progressions used
+        push @progressions, $named;
+
+        if ($opts{complexity} == 1) {
+            $named = $progressions[0];
+        }
+        elsif ($opts{complexity} == 2 && ($counter == 1 || $counter == 3)) {
+            $named = $progressions[0];
+        }
+        elsif ($opts{complexity} == 2 && $counter == 4) {
+            $named = $progressions[1];
+        }
+        elsif ($opts{complexity} == 3 && $counter == 3) {
+            $named = $progressions[2];
+        }
+        elsif ($opts{complexity} == 3 && $counter == 4) {
+            $named = $progressions[1];
+        }
+        if ($opts{complexity} < 4) {
+            $progressions[ $counter - 1 ] = $named;
+        }
+
+        print "$named\n";
+
+        my @chords = split /-/, $named;
+
+        add_chord($cn, \@chords, \@accum);
+    }
+
+    my $k = 0;
+#    print "\t", join ', ', map { "[@$_]" } @accum;
+    for my $n (@accum) {
+        $k++;
+        if ($k % 2 == 0 || $k % 4 == 0) {
+            phrase($d, $n, $motifs);
+        }
+        else {
+            $d->note($d->whole, @$n);
+        }
+    }
+    print "\n";
+}
+
+sub melody2 {
 }
