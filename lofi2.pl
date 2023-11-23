@@ -63,7 +63,13 @@ my @parts = split /-/, $opts{parts};
 
 my @progressions; # nb: populated by chords() used by bass()
 
-my $motifs = motifs(6, MIN_CHORD_SIZE);
+my $motifs = motifs(4, MIN_CHORD_SIZE);
+my $melody_motifs = motifs(
+    4,
+    MIN_CHORD_SIZE,
+    [qw/ dhn hn qn en /],
+    [    2,  3, 2, 2   ],
+);;
 
 my $d = MIDI::Drummer::Tiny->new(
     file   => "$0.mid",
@@ -125,11 +131,13 @@ sub random_parts {
 }
 
 sub motifs {
-    my ($mnum, $nnum) = @_;
+    my ($mnum, $nnum, $pool, $weights) = @_;
+    $pool    ||= [qw/ dhn hn qn en /];
+    $weights ||= [    2,  3, 1, 1   ];
     my $mdp = Music::Duration::Partition->new(
         size    => 4,
-        pool    => [qw/ dhn hn qn en /],
-        weights => [    2,  3, 1, 1   ],
+        pool    => $pool,
+        weights => $weights,
     );
     my %seen;
     my @motifs;
@@ -441,7 +449,7 @@ sub melody {
     for my $n (@accum) {
         $k++;
         if ($k % 2 == 0 || $k % 4 == 0) {
-            phrase($d, $n, $motifs);
+            phrase($d, $n, $melody_motifs);
         }
         else {
             my ($dura, $notes);
