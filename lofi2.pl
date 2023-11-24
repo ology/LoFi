@@ -171,7 +171,12 @@ sub drums {
     for my $n (1 .. $d->bars) {
         for my $m (1 .. $d->beats) {
             $i++;
-            $d->note($d->dotted_eighth, $d->closed_hh, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
+            $d->note(
+                $d->dotted_eighth,
+                $d->closed_hh,
+                $m == 1 || $m == 3 ? $d->kick : '',
+                $m == 2 && $i == 2 ? $d->snare : ''
+            );
             if ($m == 4) {
                 $d->note($d->sixteenth, $d->kick);
             }
