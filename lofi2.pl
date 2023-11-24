@@ -414,7 +414,7 @@ sub bass2 {
 sub melody {
     set_chan_patch($d->score, 2, $opts{melody_patch});
 
-    my $melody_motifs = motifs(
+    my $straight_motifs = motifs(
         4,
         4,
         [qw/ hn qn en /],
@@ -427,7 +427,7 @@ sub melody {
         [    1, 2, 2    ], # weights
         [    1, 1, 3    ], # groups
     );
-    my @motifs = (@$melody_motifs, @$triplet_motifs);
+    my @motifs = (@$straight_motifs, @$triplet_motifs);
 
     my $cn = Music::Chord::Note->new;
 
