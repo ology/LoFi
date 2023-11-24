@@ -445,9 +445,27 @@ sub melody {
 
     my @accum; # Note accumulator
 
-    for my $progression (@progressions) {
-#        print "Melody: $progression\n";
-        my @chords = split /-/, $progression;
+    for my $named (@progressions) {
+        if ($opts{complexity} == 1) {
+            $named = $progressions[0];
+        }
+        elsif ($opts{complexity} == 2 && ($counter == 1 || $counter == 3)) {
+            $named = $progressions[0];
+        }
+        elsif ($opts{complexity} == 2 && $counter == 4) {
+            $named = $progressions[1];
+        }
+        elsif ($opts{complexity} == 3 && $counter == 3) {
+            $named = $progressions[2];
+        }
+        elsif ($opts{complexity} == 3 && $counter == 4) {
+            $named = $progressions[1];
+        }
+        if ($opts{complexity} < 4) {
+            $progressions[ $counter - 1 ] = $named;
+        }
+#        print "Melody: $named\n";
+        my @chords = split /-/, $named;
         add_chord($cn, \@chords, \@accum);
     }
 
