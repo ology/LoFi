@@ -154,15 +154,19 @@ sub phrase {
                 pitches   => \@pitches,
                 intervals => [qw/-4 -3 -2 -1 1 2 3 4/],
             );
-            $d->note($motif->[$_], $voice->rand) for 0 .. $#$motif;
+            my @voices = map { $voice->rand } 1 .. @$motif;
+            $d->note($motif->[$_], $voices[$_]) for 0 .. $#$motif;
+            return $motif, \@voices;
         },
         random => sub {
-            $d->note($motif->[$_], $n->[ int rand @$n ]) for 0 .. $#$motif;
+            my @voices = map { $n->[ int rand @$n ] } 1 .. @$motif;
+            $d->note($motif->[$_], $voices[$_]) for 0 .. $#$motif;
+            return $motif, \@voices;
         },
     );
     my @keys = keys %dispatch;
     my $routine = $dispatch{ $keys[ int rand @keys ] };
-    $routine->();
+    return $routine->();
 }
 
 sub drums {
