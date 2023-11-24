@@ -417,8 +417,8 @@ sub melody {
     my $straight_motifs = motifs(
         4,
         4,
-        [qw/ hn qn en /],
-        [    3, 2, 2   ],
+        [qw/ hn dqn qn en /],
+        [    3, 2,  2, 2   ],
     );
     my $triplet_motifs = motifs(
         4,                 # number of motifs
