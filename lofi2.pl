@@ -149,6 +149,7 @@ sub phrase {
         voicegen => sub {
             my $conv = PitchConvert->new;
             my @pitches = map { $conv->pitchnum($_) } @$n;
+#            @pitches = (@pitches, map { $_ + 12 } @pitches);
             my $voice = Music::VoiceGen->new(
                 pitches   => \@pitches,
                 intervals => [qw/-4 -3 -2 -1 1 2 3 4/],
