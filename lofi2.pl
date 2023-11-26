@@ -269,7 +269,7 @@ sub bass {
         $opts{complexity},
         4,
         [qw/ wn dhn hn qn /],
-        [    4, 4,  2, 3   ],
+        [    4, 4,  1, 1   ],
     );
 
     my $bassline = Music::Bassline::Generator->new(
