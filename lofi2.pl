@@ -243,6 +243,7 @@ sub chords {
         elsif ($opts{complexity} == 3 && $counter == 4) {
             $named = $progressions[1];
         }
+        # reset the progression item to the chosen named item
         if ($opts{complexity} < 4) {
             $progressions[ $counter - 1 ] = $named;
         }
