@@ -13,7 +13,7 @@ use Music::Chord::Note ();
 use Music::Scales qw(get_scale_notes);
 use Music::VoiceGen ();
 
-use lib map { "$ENV{HOME}/sandbox/$_/lib" } qw(Data-Dataset-ChordProgressions Music-Bassline-Generator MIDI-Util MIDI-Drummer-Tiny Music-Duration Music-Duration-Partition Music-ToRoman);
+use if $ENV{USER} eq "gene", lib => map { "$ENV{HOME}/sandbox/$_/lib" } qw(Data-Dataset-ChordProgressions Music-Bassline-Generator MIDI-Util MIDI-Drummer-Tiny Music-Duration Music-Duration-Partition Music-ToRoman);
 use Data::Dataset::ChordProgressions ();
 use Music::Bassline::Generator ();
 use MIDI::Drummer::Tiny ();
