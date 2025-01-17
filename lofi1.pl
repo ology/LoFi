@@ -198,14 +198,14 @@ sub drums {
                 $d->note($d->quarter, $d->ride1, $d->kick);
             }
             else {
-              $d->note($d->dotted_eighth, $d->closed_hh, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
-              if ($m == 4) {
-                  $d->note($d->sixteenth, $d->kick);
-              }
-              else {
-                  $d->rest($d->sixteenth);
-              }
-          }
+                $d->note($d->dotted_eighth, $d->closed_hh, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
+                if ($m == 4) {
+                    $d->note($d->sixteenth, $d->kick);
+                }
+                else {
+                    $d->rest($d->sixteenth);
+                }
+            }
         }
         $i = 0 if $i == $d->bars / 2;
     }
