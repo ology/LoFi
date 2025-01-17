@@ -199,7 +199,7 @@ sub drums {
             }
             else {
                 $d->note($d->dotted_eighth, $d->closed_hh, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
-                if ($m == 4) {
+                if ($m == 4 && $i == 4) {
                     $d->note($d->sixteenth, $d->kick);
                 }
                 else {
