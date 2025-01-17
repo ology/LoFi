@@ -190,21 +190,7 @@ sub phrase {
 
 sub drums {
     set_chan_patch($d->score, 9, 0);
-
-    my $i = 0;
-    for my $n (1 .. $d->bars) {
-        for my $m (1 .. $d->beats) {
-            $i++;
-            $d->note($d->dotted_eighth, $d->ride2, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
-            if ($m == 4 && $i == 4) {
-                $d->note($d->sixteenth, $d->kick);
-            }
-            else {
-                $d->rest($d->sixteenth);
-            }
-        }
-        $i = 0 if $i == $d->bars / 2;
-    }
+    $d->metronome44swing($d->bars, $d->ride2);
 }
 
 sub drums2 {
