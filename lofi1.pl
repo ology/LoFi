@@ -123,17 +123,18 @@ sub random_parts {
 }
 
 sub motifs {
-    my ($mnum, $nnum) = @_;
+    my ($mnum, $nnum) = @_; # number of motifs, number of chord notes
     my $mdp = Music::Duration::Partition->new(
         size    => 4,
         pool    => [qw/ dhn hn qn en /],
-        weights => [    2,  3, 1, 1   ],
+        weights => [    2,  3, 2, 1   ],
     );
     my %seen;
     my @motifs;
+    # get unique motifs
     for my $i (1 .. $mnum) {
         my $motif = $mdp->motif;
-        redo if @$motif <= 1 || @$motif > $nnum;
+        # redo if @$motif <= 1 || @$motif > $nnum; # between 2 and chord notes long
         redo if $seen{ join '-', @$motif }++;
         push @motifs, $motif;
     }
@@ -321,8 +322,7 @@ sub bass {
         pool    => [qw/ wn dhn hn qn /],
         weights => [    2, 4,  4, 1   ],
     );
-    my @motifs = map { $mdp->motif } 1 .. $opts{complexity};
-    unshift @motifs, [ 'wn' ];
+    my @motifs = $mdp->motifs($opts{complexity});
 
     my $bassline = Music::Bassline::Generator->new(
         verbose   => 0,
