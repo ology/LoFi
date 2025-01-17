@@ -190,7 +190,7 @@ sub phrase {
 
 sub drums {
     set_chan_patch($d->score, 9, 0);
-    $d->metronome44swing($d->bars, $d->ride2);
+    $d->metronome44($d->bars, 0, $d->ride2);
 }
 
 sub drums2 {
