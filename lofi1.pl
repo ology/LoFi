@@ -447,7 +447,7 @@ sub bass2 {
         for my $n (0 .. $#chords) {
             my $chord = $chords[$n];
             $chord =~ s/sus2/add9/;
-            $chord =~ s/6sus4/sus4/;
+            $chord =~ s/6sus4/6/;
             my $next = $chords[ $n + 1 ];
             if ($next) {
                 $chord =~ s/sus2/add9/;
