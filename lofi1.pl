@@ -194,13 +194,18 @@ sub drums {
     for my $n (1 .. $d->bars) {
         for my $m (1 .. $d->beats) {
             $i++;
-            $d->note($d->dotted_eighth, $d->closed_hh, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
-            if ($m == 4) {
-                $d->note($d->sixteenth, $d->kick);
+            if ($n == 1 && $m == 1) {
+                $d->note($d->quarter, $d->ride1, $d->kick);
             }
             else {
-                $d->rest($d->sixteenth);
-            }
+              $d->note($d->dotted_eighth, $d->closed_hh, $m == 1 || $m == 3 ? $d->kick : '', $m == 2 && $i == 2 ? $d->snare : '');
+              if ($m == 4) {
+                  $d->note($d->sixteenth, $d->kick);
+              }
+              else {
+                  $d->rest($d->sixteenth);
+              }
+          }
         }
         $i = 0 if $i == $d->bars / 2;
     }
@@ -211,7 +216,10 @@ sub drums2 {
 
     for my $n (1 .. $d->bars / 2) {
         for my $m (1 .. $d->beats) {
-            if ($m == 3) {
+            if ($n == 1 && $m == 1) {
+                $d->note($d->quarter, $d->crash1, $d->kick);
+            }
+            elsif ($m == 3) {
                 $d->note($d->eighth, $d->closed_hh, $d->kick);
                 $d->note($d->eighth, $d->kick);
             }
