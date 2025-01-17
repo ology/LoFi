@@ -398,7 +398,7 @@ sub chords2 {
         for my $chord (@chords) {
             $chord =~ s/^(.+)\/.+$/$1/ if $chord =~ /\//;
             $chord =~ s/sus2/add9/;
-            $chord =~ s/6sus4/sus4/;
+            $chord =~ s/6sus4/6/;
             my @notes = $cn->chord_with_octave($chord, $opts{octave});
             @notes = midi_format(@notes);
             push @accum, \@notes;
