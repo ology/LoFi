@@ -29,8 +29,8 @@ my %opts = (
     octave       => 4,
     chords_patch => 4,
     bass_patch   => 35,
-    bpm          => random_item([65 .. 75]),
-    parts   => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
+    bpm          => random_item([85 .. 95]),
+    parts        => undef, # Ex: 'Amv-DMc-Emv-DMc' - <Note><Major|minor><verse|chorus>-...
     sections     => 3,
     zones        => 4, # section parts
     motifs       => 6, # half the number of possible motifs
@@ -77,6 +77,7 @@ for my $section (1 .. $opts{sections}) {
     if ($section > 1) {
         $counter = 0;
         $d->sync(
+            \&drums2,
             \&chords2,
             \&bass2,
         );
@@ -202,6 +203,22 @@ sub drums {
             }
         }
         $i = 0 if $i == $d->bars / 2;
+    }
+}
+
+sub drums2 {
+    set_chan_patch($d->score, 9, 0);
+
+    for my $n (1 .. $d->bars / 2) {
+        for my $m (1 .. $d->beats) {
+            if ($m == 3) {
+                $d->note($d->eighth, $d->closed_hh, $d->kick);
+                $d->note($d->eighth, $d->kick);
+            }
+            else {
+                $d->note($d->quarter, $d->closed_hh, $m % 2 ? $d->kick : $d->snare);
+            }
+        }
     }
 }
 
