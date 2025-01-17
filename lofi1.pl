@@ -23,7 +23,7 @@ use Music::ToRoman ();
 use constant MIN_CHORD_SIZE => 3;
 
 my %opts = (
-    complexity   => random_item([2 .. 4]), # 1: least to 4: most
+    complexity   => random_item([2 .. 4]), # 1 least to 4 most
     key          => 'C',
     scale_name   => 'ionian',
     octave       => 4,
